@@ -1,10 +1,8 @@
 from distutils.core import setup
 
-execfile("Abe/version.py")
-
 setup(
     name         = "Abe",
-    version      = __version__,
+    version      = "0.92",
     requires     = ['Crypto.Hash'],
     packages     = ['Abe', 'Abe.Chain'],
     package_data = {'Abe': ['htdocs/*']},
