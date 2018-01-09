@@ -40,7 +40,7 @@ ABE_APPNAME = "Woodcoin Explorer"
 ABE_VERSION = "0.92"
 ABE_URL = 'https://github.com/woodcoin-core/woodcoin-explorer'
 
-COPYRIGHT_YEARS = '2014, 2015, 2016, 2017'
+COPYRIGHT_YEARS = '2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018'
 COPYRIGHT = "Abe/woodcoin-core developers"
 COPYRIGHT_URL = 'https://github.com/bitcoin-abe, https://github.com/woodcoin-core'
 
@@ -54,20 +54,20 @@ EPOCH1970 = calendar.timegm(TIME1970)
 # Configurable templates may contain either.  HTML seems better supported
 # under Internet Explorer.
 DEFAULT_CONTENT_TYPE = "text/html; charset=utf-8"
-DEFAULT_HOMEPAGE = "chain/Woodcoin";
+DEFAULT_HOMEPAGE = "chains";
 DEFAULT_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" type="text/css" href="%(dotdot)s%(STATIC_PATH)sabe.css" />
-    <link rel="stylesheet" type="text/css" href="%(dotdot)s%(STATIC_PATH)sbootstrap.min.css" />
-    <link rel="shortcut icon" href="https://explorer.woodcoin.org/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="%(dotdot)sabe.css" />
+    <link rel="stylesheet" type="text/css" href="%(dotdot)sbootstrap.min.css" />
+    <link rel="shortcut icon" href="%(dotdot)sfavicon.ico" />
     <title>Woodcoin | Block Explorer</title>
 </head>
 <body>
     <div class="container">
         <h1 class=woodcenter><a href="/">
-            <img src="/logo32.png" alt="Woodcoin logo" title="Woodcoin logo"/></a>
+            <img src="%(dotdot)slogo32.png" alt="Woodcoin logo" title="Woodcoin logo"/></a>
             %(h1)s
         </h1>
         %(body)s
@@ -211,7 +211,7 @@ class Abe:
             "start_response": start_response,
             "content_type": str(abe.template_vars['CONTENT_TYPE']),
             "template": abe.template,
-            "chain": None,
+            "chain": "Woodcoin",
             }
         if 'QUERY_STRING' in env:
             page['params'] = urlparse.parse_qs(env['QUERY_STRING'])
