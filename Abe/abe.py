@@ -54,7 +54,7 @@ EPOCH1970 = calendar.timegm(TIME1970)
 # Configurable templates may contain either.  HTML seems better supported
 # under Internet Explorer.
 DEFAULT_CONTENT_TYPE = "text/html; charset=utf-8"
-DEFAULT_HOMEPAGE = "chain";
+DEFAULT_HOMEPAGE = "chains";
 DEFAULT_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -211,7 +211,7 @@ class Abe:
             "start_response": start_response,
             "content_type": str(abe.template_vars['CONTENT_TYPE']),
             "template": abe.template,
-            "chain": "Woodcoin",
+            "chain": None,
             }
         if 'QUERY_STRING' in env:
             page['params'] = urlparse.parse_qs(env['QUERY_STRING'])
