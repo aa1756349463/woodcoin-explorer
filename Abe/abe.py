@@ -54,7 +54,7 @@ EPOCH1970 = calendar.timegm(TIME1970)
 # Configurable templates may contain either.  HTML seems better supported
 # under Internet Explorer.
 DEFAULT_CONTENT_TYPE = "text/html; charset=utf-8"
-DEFAULT_HOMEPAGE = "chains";
+DEFAULT_HOMEPAGE = "chain/Woodcoin";
 DEFAULT_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -1453,21 +1453,6 @@ class Abe:
         if not abe.store.use_firstbits:
             return 'This has been disabled'
 
-    def handle_download(abe, page):
-        name = abe.args.download_name
-        if name is None:
-            name = re.sub(r'\W+', '-', ABE_APPNAME.lower()) + '-' + ABE_VERSION
-        fileobj = lambda: None
-        fileobj.func_dict['write'] = page['start_response'](
-            '200 OK',
-            [('Content-type', 'application/x-gtar-compressed'),
-             ('Content-disposition', 'filename=' + name + '.tar.gz')])
-        import tarfile
-        with tarfile.TarFile.open(fileobj=fileobj, mode='w|gz',
-                                  format=tarfile.PAX_FORMAT) as tar:
-            tar.add(os.path.split(__file__)[0], name)
-        raise Streamed()
-
     def serve_static(abe, path, start_response):
         slen = len(abe.static_path)
         if path[:slen] != abe.static_path:
@@ -1496,6 +1481,7 @@ class Abe:
     def fix_path_info(abe, env):
         ret = True
         pi = env['PATH_INFO']
+        env['wsgi.url_scheme'] = 'https'
         pi = posixpath.normpath(pi)
         if pi[-1] != '/' and env['PATH_INFO'][-1:] == '/':
             pi += '/'
@@ -1847,9 +1833,6 @@ See abe.conf for commented examples.""")
     # Set timezone
     if args.timezone:
         os.environ['TZ'] = args.timezone
-
-    if args.auto_agpl:
-        import tarfile
 
     # --rpc-load-mempool loops forever, make sure it's used with
     # --no-load/--no-serve so users know the implications
