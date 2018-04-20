@@ -406,7 +406,9 @@ class Abe:
         body += abe.search_form(page)
 
         count = get_int_param(page, 'count') or 20
-        if count >= 51:
+        if count >= 501:
+            count = 1
+        elif count <= 0:
             count = 1
         hi = get_int_param(page, 'hi')
         orig_hi = hi
