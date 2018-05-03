@@ -904,12 +904,12 @@ class Abe:
     def search_form(abe, page):
         q = (page['params'].get('q') or [''])[0]
         return [
-            '<div class="formtest">'
-            '<form action="', '/search"><p>\n'
-            '<input name="q" size="64" placeholder="Search address, blocks, transactions, pubkey hash" value="', escape(q), '" />'
-            '<button type="submit">Search</button>\n'
+            '<div class="formtest">',
+            '<form action="', '/search"><p>\n',
+            '<input name="q" size="64" placeholder="Search address, blocks, transactions, pubkey hash" value="', escape(q), '" />',
+            '<button type="submit">Search</button>\n',
             '<br />Address or hash search requires at least the first ',
-            HASH_PREFIX_MIN, ' characters.</p>Count is limited to a maximum of 50 blocks.</form></div>\n']
+            HASH_PREFIX_MIN, ' characters.</br>Count is limited to a maximum of 500 blocks.</p></form></div>\n']
 
     def handle_search(abe, page):
         page['title'] = 'Search'
