@@ -675,11 +675,13 @@ class Abe:
         try:
             # XXX Should pass chain to export_tx to help parse scripts.
             tx = abe.store.export_tx(tx_hash = tx_hash, format = 'browser')
+            if tx is None:
+                raise PageNotFound
         except DataStore.MalformedHash:
             body += ['<p class="error">Not in correct format.</p>']
             return
-
-        if tx is None:
+        except PageNotFound:
+            page['status'] = '404 Not Found'
             body += ['<p class="error">Transaction not found.</p>']
             return
 
