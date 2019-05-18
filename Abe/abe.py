@@ -61,17 +61,20 @@ DEFAULT_TEMPLATE = """
 <head>
     <link rel="stylesheet" type="text/css" href="%(dotdot)sabe.css" />
     <link rel="stylesheet" type="text/css" href="%(dotdot)sbootstrap.min.css" />
-    <link rel="shortcut icon" href="%(dotdot)sfavicon.ico" />
+    <link rel="shortcut icon" href="https://raw.githubusercontent.com/woodcoin-core/woodcoin-explorer/master/Abe/htdocs/favicon.ico" />
     <title>Woodcoin | Block Explorer</title>
 </head>
 <body>
     <div class="container">
         <h1 class=woodcenter><a href="/">
-            <img src="%(dotdot)slogo32.png" alt="Woodcoin logo" title="Woodcoin logo"/></a>
+            <img src="https://raw.githubusercontent.com/woodcoin-core/woodcoin-explorer/master/Abe/htdocs/logo32.png" alt="Woodcoin logo" title="Woodcoin logo"/></a>
             %(h1)s
         </h1>
         %(body)s
     </div>
+    <div class="footer">
+        <b>Maintained by <a href="https://sking.io">Scott King</a></b>
+    <div>
 </body>
 </html>
 """
@@ -246,7 +249,8 @@ class Abe:
         except NoSuchChainError, e:
             page['body'] += [
                 '<p class="error">'
-                'Sorry, I don\'t know about that chain!</p>\n']
+                'That chain wasn\'t found.</p>\n']
+            page['status'] = '404 Not Found'
         except Redirect:
             return redirect(page)
         except Streamed:
@@ -467,7 +471,7 @@ class Abe:
         if hi != count - 1:
             nav[-1] = ['<a href="', basename, '?hi=', str(count - 1),
                         '&amp;count=', str(count), '">', nav[-1], '</a>']
-        for c in (20, 50):
+        for c in (20, 50, 125, 250, 500):
             nav += [' ']
             if c != count:
                 nav += ['<a href="', basename, '?count=', str(c)]
@@ -921,10 +925,14 @@ class Abe:
             return
 
         found = []
-        if HEIGHT_RE.match(q):      found += abe.search_number(int(q))
-        if util.possible_address(q):found += abe.search_address(q)
-        elif ADDR_PREFIX_RE.match(q):found += abe.search_address_prefix(q)
-        if is_hash_prefix(q):       found += abe.search_hash_prefix(q)
+        if HEIGHT_RE.match(q):
+            found += abe.search_number(int(q))
+        if util.possible_address(q):
+            found += abe.search_address(q)
+        elif ADDR_PREFIX_RE.match(q):
+            found += abe.search_address_prefix(q)
+        if is_hash_prefix(q):
+            found += abe.search_hash_prefix(q)
         found += abe.search_general(q)
         abe.show_search_results(page, found)
 
@@ -932,6 +940,7 @@ class Abe:
         if not found:
             page['body'] = [
                 '<p class="error">No results found</p>\n', abe.search_form(page)]
+            page['status'] = '404 Not Found'
             return
 
         if len(found) == 1:
@@ -1393,18 +1402,16 @@ class Abe:
         addr = wsgiref.util.shift_path_info(page['env'])
         if addr is None:
             return \
-                "Returns the version encoded in ADDRESS as a hex string.\n" \
-                "If ADDRESS is invalid, returns either X5, SZ, or CK for" \
-                " BBE compatibility.\n" \
-                "/q/checkaddress/ADDRESS\n"
+                "Returns valid or invalid whether the ADDRESS is a Woodcoin ADDRESS or not\n" \
+                "/q/checkaddress/ADDRESS"
         if util.possible_address(addr):
             version, hash = util.decode_address(addr)
             if util.hash_to_address(version, hash) == addr:
-                return version.encode('hex').upper()
-            return 'CK'
-        if len(addr) >= 26:
-            return 'X5'
-        return 'SZ'
+                return 'valid'
+            else:
+                return 'invalid'
+        else:
+           return 'invalid'
 
     def q_nethash(abe, page, chain):
          """This has been disabled"""
@@ -1763,12 +1770,12 @@ def create_conf():
         "debug":                    None,
         "static_path":              None,
         "document_root":            None,
-        "auto_agpl":                None,
+        "auto_agpl":                False,
         "download_name":            None,
         "watch_pid":                None,
         "base_url":                 None,
         "logging":                  None,
-        "address_history_rows_max": 20000,
+        "address_history_rows_max": 200000,
         "shortlink_type":           None,
 
         "template":     DEFAULT_TEMPLATE,
