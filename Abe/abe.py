@@ -784,7 +784,7 @@ class Abe:
 
         try:
             tx = abe.store.export_tx(tx_hash=tx_hash.lower())
-        except Exception:
+        except TypeError:
             page['status'] = '404 Not Found'
             return 'ERROR: Not in correct format'  # BBE compatible
         if tx is None:
