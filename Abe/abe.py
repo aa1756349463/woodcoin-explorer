@@ -543,6 +543,7 @@ class Abe:
             return
 
         if b is None:
+            page['status'] = '404 Not Found'
             body += ['<p class="error">Block not found.</p>']
             return
 
@@ -652,12 +653,14 @@ class Abe:
     def handle_block(abe, page):
         block_hash = wsgiref.util.shift_path_info(page['env'])
         if block_hash in (None, '') or page['env']['PATH_INFO'] != '':
+            page['status'] = '404 Not Found'
             raise PageNotFound()
 
         block_hash = block_hash.lower()  # Case-insensitive, BBE compatible
         page['title'] = 'Block'
 
         if not is_hash_prefix(block_hash):
+            page['status'] = '404 Not Found'
             page['body'] += ['<p class="error">Not a valid block hash.</p>']
             return
 
@@ -776,10 +779,16 @@ class Abe:
         tx_hash = wsgiref.util.shift_path_info(page['env'])
         if tx_hash in (None, '') or page['env']['PATH_INFO'] != '' \
                 or not is_hash_prefix(tx_hash):
+            page['status'] = '404 Not Found'
             return 'ERROR: Not in correct format'  # BBE compatible
 
-        tx = abe.store.export_tx(tx_hash=tx_hash.lower())
+        try:
+            tx = abe.store.export_tx(tx_hash=tx_hash.lower())
+        except Exception:
+            page['status'] = '404 Not Found'
+            return 'ERROR: Not in correct format'  # BBE compatible
         if tx is None:
+            page['status'] = '404 Not Found'
             return 'ERROR: Transaction does not exist.'  # BBE compatible
         return json.dumps(tx, sort_keys=True, indent=2)
 
