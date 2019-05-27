@@ -411,10 +411,12 @@ class Abe:
 
         try:
             count = get_int_param(page, 'count')
-            if 0 <= count <= 500:
+            if 1 <= count <= 500:
                 count = count
+            elif count is None:
+                count = 20
             else:
-                count = 1
+                raise ValueError
         except ValueError:
             count = 1
 
