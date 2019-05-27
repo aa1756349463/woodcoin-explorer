@@ -410,19 +410,31 @@ class Abe:
         body += abe.search_form(page)
 
         try:
-            count = get_int_param(page, 'count') or 20
-            if count >= 501:
-                count = 1
-            elif count <= 0:
+            count = get_int_param(page, 'count')
+            if 0 <= count <= 500:
+                count = count
+            else:
                 count = 1
         except ValueError:
             count = 1
 
+        check_highest = abe.store.selectrow("""
+            SELECT b.block_height
+            FROM block b
+            JOIN chain c ON (c.chain_last_block_id = b.block_id)
+            WHERE c.chain_id = ?
+        """, (chain.id,))
+        check_highest = int(check_highest[0])
+
         try:
             hi = get_int_param(page, 'hi')
-            orig_hi = hi
+            if hi > check_highest:
+                hi = None
+            else:
+                orig_hi = hi
         except ValueError:
-            hi = 0
+            hi = None
+            orig_hi = None
 
         if hi is None:
             row = abe.store.selectrow("""
@@ -484,16 +496,11 @@ class Abe:
 
         nav += [' <a href="', page['dotdot'], '">Search</a>']
 
-        extra = False
-        #extra = True
         body += ['<p class="pull-right">', nav, '</p>\n',
                  '<table class="table table-striped table-hover"><tr><th>Block</th><th>Approx. Time</th>',
                  '<th>Transactions</th><th>Value Out</th>',
                  '<th>Difficulty</th><th>Outstanding</th>',
                  '<th>Average Age</th><th>Chain Age</th>',
-                 ['<th>Satoshi-seconds</th>',
-                  '<th>Total ss</th>']
-                 if extra else '',
                  '</tr>\n']
         for row in rows:
             (hash, height, nTime, num_tx, nBits, value_out,
@@ -527,8 +534,6 @@ class Abe:
                 '</td><td>', format_satoshis(satoshis, chain),
                 '</td><td>', avg_age,
                 '</td><td>', '%5g' % (seconds / 86400.0),
-                ['</td><td>', '%8g' % ss,
-                 '</td><td>', '%8g' % total_ss] if extra else '',
                 '</td></tr>\n']
 
         body += ['</table>\n<p class="pull-right">', nav, '</p>\n']
