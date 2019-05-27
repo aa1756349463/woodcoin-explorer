@@ -432,6 +432,8 @@ class Abe:
             hi = get_int_param(page, 'hi')
             if hi > check_highest:
                 hi = None
+            elif hi <= -1:
+                hi = None
             else:
                 orig_hi = hi
         except ValueError:
