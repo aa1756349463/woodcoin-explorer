@@ -390,9 +390,15 @@ class Abe:
         handler(page)
 
     def handle_chain(abe, page):
-        symbol = wsgiref.util.shift_path_info(page['env'])
-        chain = abe.chain_lookup_by_name(symbol)
-        page['chain'] = chain
+        try:
+            symbol = wsgiref.util.shift_path_info(page['env'])
+            chain = abe.chain_lookup_by_name(symbol)
+            page['chain'] = chain
+        except Exception:
+            page['status'] = '404 Not Found'
+            body = page['body']
+            body += ['<p class="error">The requested chain was not found.</p>']
+            return
 
         cmd = wsgiref.util.shift_path_info(page['env'])
         if cmd == '':
@@ -406,8 +412,8 @@ class Abe:
 
         page['title'] = chain.name
 
-        body = page['body']
-        body += abe.search_form(page)
+#        body = page['body']
+#        body += abe.search_form(page)
 
         try:
             count = get_int_param(page, 'count')
@@ -426,7 +432,18 @@ class Abe:
             JOIN chain c ON (c.chain_last_block_id = b.block_id)
             WHERE c.chain_id = ?
         """, (chain.id,))
-        check_highest = int(check_highest[0])
+
+        try:
+            check_highest = int(check_highest[0])
+        except TypeError:
+            page['status'] = '404 Not Found'
+            page['title'] = [escape(ABE_APPNAME), " ", ABE_VERSION]
+            body = page['body']
+            body += ['<p class="error">The requested chain was not found.</p>']
+            return
+
+        body = page['body']
+        body += abe.search_form(page)
 
         try:
             hi = get_int_param(page, 'hi')
@@ -451,10 +468,11 @@ class Abe:
                 hi = row[0]
         if hi is None:
             if orig_hi is None and count > 0:
-                body += ['<p>I have no blocks in this chain.</p>']
+                page['status'] = '404 Not Found'
+                body += ['<p class="error">I have no blocks in this chain.</p>']
             else:
-                body += ['<p class="error">'
-                         'The requested range contains no blocks.</p>\n']
+                page['status'] = '404 Not Found'
+                body += ['<p class="error">The requested range contains no blocks.</p>\n']
             return
 
         rows = abe.store.selectall("""
@@ -612,9 +630,6 @@ class Abe:
             ['Average Coin Age: %6g' % (b['satoshi_seconds'] / 86400.0 / b['chain_satoshis'],),
              ' days<br />\n']
             if b['chain_satoshis'] and (b['satoshi_seconds'] is not None) else '',
-
-            
-
             '</p>\n']
 
         body += ['<h3>Transactions</h3>\n']
@@ -678,6 +693,7 @@ class Abe:
     def handle_tx(abe, page):
         tx_hash = wsgiref.util.shift_path_info(page['env'])
         if tx_hash in (None, '') or page['env']['PATH_INFO'] != '':
+            page['status'] = '404 Not Found'
             raise PageNotFound()
 
         tx_hash = tx_hash.lower()  # Case-insensitive, BBE compatible
@@ -685,6 +701,7 @@ class Abe:
         body = page['body']
 
         if not is_hash_prefix(tx_hash):
+            page['status'] = '404 Not Found'
             body += ['<p class="error">Not a valid transaction hash.</p>']
             return
 
@@ -694,6 +711,7 @@ class Abe:
             if tx is None:
                 raise PageNotFound
         except DataStore.MalformedHash:
+            page['status'] = '404 Not Found'
             body += ['<p class="error">Not in correct format.</p>']
             return
         except PageNotFound:
@@ -814,7 +832,7 @@ class Abe:
                 address, chain=page['chain'], max_rows=abe.address_history_rows_max)
         except DataStore.MalformedAddress:
             page['status'] = '404 Not Found'
-            body += ['<p>Not a valid address.</p>']
+            body += ['<p class="error">Not a valid address.</p>']
             return
 
         if history is None:
