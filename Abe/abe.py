@@ -1343,18 +1343,11 @@ class Abe:
             return 'Shows the difficulty of the last block in CHAIN.\n' \
                 '/chain/CHAIN/q/getdifficulty\n'
         target = abe.store.get_target(chain.id)
-        return "" if target is None else util.target_to_difficulty(target)
+        return util.target_to_difficulty(target)
 
     def q_translate_address(abe, page, chain):
-        """shows the address in a given chain with a given address's hash."""
-        addr = wsgiref.util.shift_path_info(page['env'])
-        if chain is None or addr is None:
-            return 'Translates ADDRESS for use in CHAIN.\n' \
-                '/chain/CHAIN/q/translate_address/ADDRESS\n'
-        version, hash = util.decode_check_address(addr)
-        if hash is None:
-            return addr + " (INVALID ADDRESS)"
-        return util.hash_to_address(chain.address_version, hash)
+        """This has been disabled"""
+        return 'This has been disabled'
 
     def q_decode_address(abe, page, chain):
         """shows the version prefix and hash encoded in an address."""
