@@ -70,7 +70,7 @@ def include(filename, conf={}, config_name='config', strict=False):
     _include(set(), filename, conf, config_name, strict)
     return conf
 
-class _Reader:
+class _Reader(object):
     __slots__ = ['fp', 'lineno', 'line']
     def __init__(rdr, fp):
         rdr.fp = fp
