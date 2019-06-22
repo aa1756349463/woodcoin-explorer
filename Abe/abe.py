@@ -836,8 +836,7 @@ class Abe:
             return
 
         if history is None:
-            body += ["<p>I'm sorry, this address has too many records"
-                     " to display.</p>"]
+            body += ['<p class="error">I\'m sorry, this address has too many records to display.</p>']
             return
 
         binaddr  = history['binaddr']
@@ -851,7 +850,7 @@ class Abe:
 
         if (not chains):
             page['status'] = '404 Not Found'
-            body += ['<p>Address not seen on the network.</p>']
+            body += ['<p class="error">Address not seen on the network.</p>']
             return
 
         def format_amounts(amounts, link):
