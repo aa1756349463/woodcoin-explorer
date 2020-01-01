@@ -19,24 +19,28 @@ uses a completely new implementation.
 Installation
 ------------
 
-Issue:
+On Debian-based systems, if you're using MySQL, run:
 
-    python setup.py install
+    sudo apt install requests python3-dev gcc default-libmysqlclient-dev python3-mysqldb build-essential
+
+Run:
+
+    python3 setup.py install
 
 This will install abe to your system. After you set up the config file and
 database (see below and README-<DB>.txt) you can run:
 
-    python -m Abe.abe --config myconf.conf --commit-bytes 100000 --no-serve
+    python3 -m Abe.abe --config myconf.conf --commit-bytes 100000 --no-serve
     
 This will perform the initial data load and will take a long time.
 After it's fully synced, you can run the web server with: 
 
-    python -m Abe.abe --config myconf.conf
+    python3 -m Abe.abe --config myconf.conf
     
 To really get everything right see the README file for your type of
 database.
 
-Abe depends on Python 2.7 (or 2.6), the pycrypto package, and an SQL
+Abe depends on Python 3, the requests package, and an SQL
 database supporting ROLLBACK.  Abe runs on PostgreSQL, MySQL's InnoDB
 engine, and SQLite.  Other SQL databases may work with minor changes.
 Abe formerly ran on some ODBC configurations, Oracle, and IBM DB2, but
@@ -80,7 +84,7 @@ information.
 Database
 --------
 
-For usage, run "python -m Abe.abe --help" and see the comments in
+For usage, run "python3 -m Abe.abe --help" and see the comments in
 abe.conf.
 
 You will have to specify a database driver and connection arguments
@@ -166,6 +170,3 @@ would like to be.
 
 Forum thread: https://bitcointalk.org/index.php?topic=22785.0
 Newbies: https://bitcointalk.org/index.php?topic=51139.0
-
-Donations appreciated: 1PWC7PNHL1SgvZaN7xEtygenKjWobWsCuf (BTC)
-NJ3MSELK1cWnqUa6xhF2wUYAnz3RSrWXcK (NMC)

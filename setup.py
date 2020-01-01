@@ -3,10 +3,10 @@ from distutils.core import setup
 setup(
     name         = "Abe",
     version      = "0.92",
-    requires     = ['Crypto.Hash'],
+    requires     = ['requests'],
     packages     = ['Abe', 'Abe.Chain'],
     package_data = {'Abe': ['htdocs/*']},
-    author       = "John Tobey",
+    author       = "John Tobey, Thomas Guyot-Sionnest, Scott King",
     author_email = "jtobey@john-edwin-tobey.org",
     url          = "https://github.com/bitcoin-abe/bitcoin-abe",
     classifiers=[
