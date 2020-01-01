@@ -19,14 +19,10 @@
 # Misc util routines
 #
 
+import codecs
+import hashlib
 import re
-import base58
-import Crypto.Hash.SHA256 as SHA256
-
-try:
-    import Crypto.Hash.RIPEMD as RIPEMD160
-except Exception:
-    import ripemd_via_hashlib as RIPEMD160
+from . import base58
 
 # This function comes from bitcointools, bct-LICENSE.txt.
 def determine_db_dir():
@@ -41,33 +37,54 @@ def determine_db_dir():
 
 # This function comes from bitcointools, bct-LICENSE.txt.
 def long_hex(bytes):
-    return bytes.encode('hex_codec')
+    return codecs.encode(bytes, 'hex')
 
 # This function comes from bitcointools, bct-LICENSE.txt.
-def short_hex(bytes):
-    t = bytes.encode('hex_codec')
+def short_hex(the_input):
+    if type(the_input) == str:
+        the_input = the_input.encode()
+    t = codecs.encode(the_input, 'hex')
     if len(t) < 11:
         return t
-    return t[0:4]+"..."+t[-4:]
+    return t[0:4].decode()+"..."+t[-4:].decode()
 
 NULL_HASH = "\0" * 32
 GENESIS_HASH_PREV = NULL_HASH
 
+def RIPEMD160(s):
+    h = hashlib.new('ripemd160')
+    if type(s) == bytes:
+        h.update(s)
+    else:
+        h.update(s.encode())
+    return h.digest()
+
 def sha256(s):
-    return SHA256.new(s).digest()
+    h = hashlib.sha256()
+    if type(s) == bytes:
+        h.update(s)
+    else:
+        h.update(s.encode())
+    return h.digest()
 
 def double_sha256(s):
-    return sha256(sha256(s))
+    first = hashlib.sha256()
+    if type(s) == bytes:
+        first.update(s)
+    else:
+        first.update(s.encode())
+    second = hashlib.sha256()
+    second.update(first.digest())
+    return second.digest()
 
 def sha3_256(s):
-    import hashlib
     import sys
     if sys.version_info < (3, 4):
         import sha3
     return hashlib.sha3_256(s).digest()
 
 def pubkey_to_hash(pubkey):
-    return RIPEMD160.new(SHA256.new(pubkey).digest()).digest()
+    return RIPEMD160(sha256(pubkey))
 
 def calculate_target(nBits):
     # cf. CBigNum::SetCompact in bignum.h
@@ -113,6 +130,10 @@ def possible_address(string):
     return ADDRESS_RE.match(string)
 
 def hash_to_address(version, hash):
+    if type(version) != bytes:
+        version = version.encode()
+    if type(hash) != bytes:
+        hash = hash.encode('latin1')
     vh = version + hash
     return base58.b58encode(vh + double_sha256(vh)[:4])
 
@@ -144,11 +165,12 @@ class JsonrpcMethodNotFound(JsonrpcException):
     pass
 
 def jsonrpc(url, method, *params):
-    import json, urllib
+    import json
+    import requests
+
     postdata = json.dumps({"jsonrpc": "2.0",
                            "method": method, "params": params, "id": "x"})
-    respdata = urllib.urlopen(url, postdata).read()
-    resp = json.loads(respdata)
+    resp = requests.post(url, postdata).json()
     if resp.get('error') is not None:
         if resp['error']['code'] == -32601:
             raise JsonrpcMethodNotFound(resp['error'], method, params)
@@ -156,7 +178,7 @@ def jsonrpc(url, method, *params):
     return resp['result']
 
 def str_to_ds(s):
-    import BCDataStream
+    from . import BCDataStream
     ds = BCDataStream.BCDataStream()
     ds.write(s)
     return ds
@@ -179,7 +201,7 @@ class CmdLine(object):
 
         args, argv = readconf.parse_argv(self.argv, self.conf, strict=False)
         if argv and argv[0] in ('-h', '--help'):
-            print self.usage()
+            print(self.usage())
             return None, []
 
         logging.basicConfig(
@@ -194,6 +216,7 @@ class CmdLine(object):
 
 # Abstract hex-binary conversions for eventual porting to Python 3.
 def hex2b(s):
-    return s.decode('hex')
+    return codecs.decode(s, 'hex')
 def b2hex(b):
-    return b.encode('hex')
+    return codecs.encode(b, 'hex')
+
