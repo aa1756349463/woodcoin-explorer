@@ -213,7 +213,7 @@ class Abe:
             "body": [],
             "env": env,
             "params": {},
-            "dotdot": "../" * (env['PATH_INFO'].count('/') - 1),
+            "dotdot": "../" * (escape(env['PATH_INFO']).count('/') - 1),
             "start_response": start_response,
             "content_type": abe.template_vars['CONTENT_TYPE'],
             "template": abe.template,
