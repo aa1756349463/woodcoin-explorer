@@ -1083,13 +1083,6 @@ store._ddl['txout_approx'],
         block_id = int(store.new_id("block"))
         b['block_id'] = block_id
 
-        if chain is not None:
-            # Verify Merkle root.
-            if b['hashMerkleRoot'] != chain.merkle_root(tx_hash_array):
-                if b['hashMerkleRoot'] == b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00':
-                    print("b['hashMerkleRoot'] is 64 zeroes, and this isn't an error.")
-                raise MerkleRootMismatch(b['hash'], tx_hash_array)
-
         # Look for the parent block.
         hashPrev = b['hashPrev']
         if chain is None:
@@ -1097,6 +1090,16 @@ store._ddl['txout_approx'],
             is_genesis = hashPrev == util.GENESIS_HASH_PREV
         else:
             is_genesis = hashPrev == chain.genesis_hash_prev
+
+            # Verify Merkle root.
+            if b['hashMerkleRoot'] != chain.merkle_root(tx_hash_array):
+                if isinstance(b['hashMerkleRoot'], bytes) and codecs.encode(b['hashMerkleRoot'], 'hex') == b'0000000000000000000000000000000000000000000000000000000000000000':
+                    hashPrev = b['hashPrev']
+                    is_genesis = hashPrev == chain.genesis_hash_prev
+                    if is_genesis:
+                        pass
+                    else:
+                        raise MerkleRootMismatch(b['hash'], tx_hash_array)
 
         (prev_block_id, prev_height, prev_work, prev_satoshis,
          prev_seconds, prev_ss, prev_total_ss, prev_nTime) = (
@@ -1973,10 +1976,10 @@ store._ddl['txout_approx'],
         tx['txIn' if is_bin else 'in'] = txins
         for row in store.selectall("""
             SELECT
-                COALESCE(tx.tx_hash, uti.txout_tx_hash),
-                COALESCE(txout.txout_pos, uti.txout_pos)""" + (""",
-                txin_scriptSig,
-                txin_sequence""" if store.keep_scriptsig else "") + """
+            COALESCE(tx.tx_hash, uti.txout_tx_hash),
+            COALESCE(txout.txout_pos, uti.txout_pos)""" + (""",
+            txin_scriptSig,
+            txin_sequence""" if store.keep_scriptsig else "") + """
             FROM txin
             LEFT JOIN txout ON (txin.txout_id = txout.txout_id)
             LEFT JOIN tx ON (txout.tx_id = tx.tx_id)
@@ -2005,7 +2008,7 @@ store._ddl['txout_approx'],
                 if is_bin:
                     txin['scriptSig'] = store.binout(scriptSig)
                 else:
-                    txin['raw_scriptSig'] = store.binout_hex(scriptSig).decode()
+                    txin['raw_scriptSig'] = store.binout_hex(scriptSig)
                 txin['sequence'] = None if sequence is None else int(sequence)
             txins.append(txin)
 
@@ -2028,7 +2031,7 @@ store._ddl['txout_approx'],
                 frac = satoshis % coin
                 txout = {
                     'value': ("%%d.%%0%dd" % (decimals,)) % (integer, frac),
-                    'raw_scriptPubKey': store.binout_hex(scriptPubKey).decode()}
+                    'raw_scriptPubKey': store.binout_hex(scriptPubKey)}
             txouts.append(txout)
 
         if not is_bin:
