@@ -83,34 +83,29 @@ class SqlAbstraction(object):
             if x is None:
                 return None
             else:
-                return codecs.encode(x, 'hex')
-#                str(x).encode('hex')
+                return codecs.encode(x, 'hex').decode()
 
         def from_hex(x):
             if x is None:
                 return None
             else:
-#                if isinstance(x, str):
                 return codecs.decode(x, 'hex')
-#            return None if x is None else x.decode('hex')
 
         def to_hex_rev(x):
             if x is None:
                 return None
             else:
                 return codecs.encode(str(x)[::-1], 'hex')
-#                return str(x)[::-1].encode('hex')
 
         def from_hex_rev(x):
             if x is None:
                 return None
             else:
                 return codecs.decode(x[::-1])
-#                x.decode('hex')[::-1]
 
         val = sql.config.get('binary_type')
 
-        if val in (None, 'str', "binary"):
+        if val in (None, 'str', 'binary'):
             binin       = identity
             binin_hex   = from_hex
             binout      = identity
