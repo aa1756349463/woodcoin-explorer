@@ -61,8 +61,8 @@ DEFAULT_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" type="text/css" href="%(dotdot)sabe.css" />
-    <link rel="stylesheet" type="text/css" href="%(dotdot)sbootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/abe.css" />
+    <link rel="stylesheet" type="text/css" href="/bootstrap.min.css" />
     <link rel="shortcut icon" href="https://raw.githubusercontent.com/woodcoin-core/woodcoin-explorer/master/Abe/htdocs/favicon.ico" />
     <title>Woodcoin | Block Explorer</title>
 </head>
@@ -544,7 +544,7 @@ class Abe:
 
             body += [
                 '<tr><td><a href="', page['dotdot'], 'block/',
-                abe.store.hashout_hex(hash).decode(),
+                abe.store.hashout_hex(hash),
                 '">', height, '</a>'
                 '</td><td>', format_time(int(nTime)),
                 '</td><td>', num_tx,
@@ -595,22 +595,22 @@ class Abe:
                 'Proof of Stake' if is_stake_block else 'Proof of Work',
                 ': ',
                 format_satoshis(b['generated'], chain), ' coins generated<br />\n']
-        body += ['Hash: ', b['hash'].decode(), '<br />\n']
+        body += ['Hash: ', b['hash'], '<br />\n']
 
         if b['hashPrev'] is not None:
             body += ['Previous Block: <a href="', dotdotblock,
-                     b['hashPrev'].decode(), '">', b['hashPrev'].decode(), '</a><br />\n']
+                     b['hashPrev'], '">', b['hashPrev'], '</a><br />\n']
         if b['next_block_hashes']:
             body += ['Next Block: ']
         for hash in b['next_block_hashes']:
-            body += ['<a href="', dotdotblock, hash.decode(), '">', hash.decode(), '</a><br />\n']
+            body += ['<a href="', dotdotblock, hash, '">', hash, '</a><br />\n']
 
         body += [
             ['Height: ', b['height'], '<br />\n']
             if b['height'] is not None else '',
 
             'Version: ', b['version'], '<br />\n',
-            'Transaction Merkle Root: ', b['hashMerkleRoot'].decode(), '<br />\n',
+            'Transaction Merkle Root: ', b['hashMerkleRoot'], '<br />\n',
             'Time: ', b['nTime'], ' (', format_time(b['nTime']), ')<br />\n',
             'Difficulty: ', format_difficulty(util.calculate_difficulty(b['nBits'])),
             ' (Bits: %x)' % (b['nBits'],), '<br />\n',
@@ -636,8 +636,8 @@ class Abe:
                  '</tr>\n']
 
         for tx in b['transactions']:
-            body += ['<tr><td><a href="../tx/' + tx['hash'].decode() + '">',
-                     tx['hash'][:10].decode(), '...</a>'
+            body += ['<tr><td><a href="../tx/' + tx['hash'] + '">',
+                     tx['hash'][:10], '...</a>'
                      '</td><td>', format_satoshis(tx['fees'], chain),
                      '</td><td>', tx['size'] / 1000.0,
                      '</td><td>']
@@ -918,9 +918,9 @@ class Abe:
             if type == 'direct':
                 balance[chain.id] += elt['value']
 
-            body += ['<tr class="', type, '"><td class="tx"><a href="../tx/', elt['tx_hash'].decode(),
+            body += ['<tr class="', type, '"><td class="tx"><a href="../tx/', elt['tx_hash'],
                      '#', 'i' if elt['is_out'] else 'o', elt['pos'],
-                     '">', elt['tx_hash'][:10].decode(), '...</a>',
+                     '">', elt['tx_hash'][:10], '...</a>',
                      '</td><td class="block"><a href="../block/', elt['blk_hash'],
                      '">', elt['height'], '</a></td><td class="time">',
                      format_time(elt['nTime']), '</td><td class="amount">']
@@ -1002,7 +1002,7 @@ class Abe:
                 name = hexhash
             return {
                 'name': chain_name + ' ' + name,
-                'uri': 'block/' + hexhash.decode(),
+                'uri': 'block/' + hexhash,
                 }
 
         return list(map(process, abe.store.selectall("""
@@ -1527,7 +1527,7 @@ class Abe:
     def fix_path_info(abe, env):
         ret = True
         pi = env['PATH_INFO']
-        env['wsgi.url_scheme'] = 'http'
+        env['wsgi.url_scheme'] = 'https'
         pi = posixpath.normpath(pi)
         if pi[-1] != '/' and env['PATH_INFO'][-1:] == '/':
             pi += '/'
@@ -1888,4 +1888,3 @@ See abe.conf for commented examples.""")
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))
-
